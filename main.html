@@ -2,147 +2,294 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Love Meter</title>
-
-<!-- Sentiment Analysis Library -->
-<script src="https://cdn.jsdelivr.net/npm/sentiment@5.0.2/build/sentiment.min.js"></script>
+<title>Love Meter 💗</title>
 
 <style>
 body {
     margin: 0;
-    background: #F5E6D3;
-    font-family: 'Segoe UI', sans-serif;
-    text-align: center;
-    overflow: hidden;
-}
-
-/* Intro Screen */
-#intro {
     height: 100vh;
+    background: linear-gradient(135deg, #F5E6D3, #FADADD);
+    font-family: Arial, sans-serif;
     display: flex;
     justify-content: center;
     align-items: center;
+    overflow: hidden;
+}
+
+/* Sparkle Background */
+.sparkle-layer {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+    transition: opacity 1s ease;
+}
+
+.sparkle {
+    position: absolute;
+    font-size: 14px;
+    opacity: 0.8;
+    animation: fall linear infinite, twinkle 2s ease-in-out infinite alternate;
+}
+
+@keyframes fall {
+    0% {
+        transform: translateY(-10vh);
+    }
+    100% {
+        transform: translateY(110vh);
+    }
+}
+
+@keyframes twinkle {
+    0% { opacity: 0.3; }
+    100% { opacity: 1; }
+}
+
+/* INTRO */
+#intro {
+    position: absolute;
+    text-align: center;
+    transition: opacity 1s ease;
+    z-index: 2;
 }
 
 .heart {
-    font-size: 90px;
-    animation: pulse 1.5s infinite;
+    font-size: 170px;
+    animation: pulse 2.5s ease-in-out infinite;
+    filter: drop-shadow(0 0 35px rgba(255,105,180,0.8));
 }
 
 @keyframes pulse {
     0% { transform: scale(1); }
-    50% { transform: scale(1.25); }
+    50% { transform: scale(1.18); }
     100% { transform: scale(1); }
 }
 
-/* Main Section */
+#whisper {
+    margin-top: 10px;
+    font-size: 15px;
+    color: #d63384;
+    opacity: 0.9;
+    letter-spacing: 1px;
+}
+
+/* CARD */
 #main {
-    display: none;
-    padding-top: 100px;
+    opacity: 0;
+    transform: translateY(40px);
+    transition: all 1s ease;
+    background: rgba(255,255,255,0.85);
+    padding: 40px;
+    border-radius: 30px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+    text-align: center;
+    width: 360px;
+    position: relative;
+    z-index: 2;
+}
+
+.show {
+    opacity: 1 !important;
+    transform: translateY(0px) !important;
 }
 
 input {
     padding: 12px;
-    width: 300px;
-    border-radius: 20px;
+    width: 100%;
+    border-radius: 25px;
     border: none;
-    outline: none;
-    font-size: 16px;
+    font-size: 14px;
 }
 
 button {
     margin-top: 15px;
     padding: 10px 20px;
-    border-radius: 20px;
+    border-radius: 25px;
     border: none;
-    background: #d4a373;
+    background: #ff8fab;
     color: white;
     cursor: pointer;
-    font-size: 15px;
+    transition: 0.3s;
 }
 
 button:hover {
-    background: #c08b5c;
+    transform: scale(1.05);
 }
 
-/* Meter */
 .meter-container {
-    width: 320px;
-    height: 25px;
-    background: #ddd;
-    margin: 25px auto;
-    border-radius: 30px;
+    width: 100%;
+    height: 18px;
+    background: #eee;
+    margin-top: 20px;
+    border-radius: 20px;
     overflow: hidden;
 }
 
 #meter {
     height: 100%;
     width: 0%;
-    border-radius: 30px;
-    transition: 0.8s ease;
+    transition: width 1s ease;
 }
 
 #emoji {
-    font-size: 40px;
+    font-size: 32px;
     margin-top: 15px;
+}
+
+#reply {
+    margin-top: 15px;
+    font-weight: bold;
+}
+
+/* Shake */
+.shake {
+    animation: shake 0.4s;
+}
+
+@keyframes shake {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-8px); }
+    50% { transform: translateX(8px); }
+    75% { transform: translateX(-8px); }
+    100% { transform: translateX(0); }
+}
+
+/* Floating hearts */
+.floating-heart {
+    position: absolute;
+    font-size: 22px;
+    animation: floatUp 2s linear forwards;
+}
+
+@keyframes floatUp {
+    from { transform: translateY(0); opacity:1; }
+    to { transform: translateY(-150px); opacity:0; }
 }
 </style>
 </head>
 
 <body>
 
+<div class="sparkle-layer" id="sparkleLayer"></div>
+
 <div id="intro">
-    <div class="heart">❤️</div>
+    <div class="heart">💖</div>
+    <div id="whisper">Say something sweet...</div>
 </div>
 
 <div id="main">
-    <h2>Say it 💌</h2>
-    <input type="text" id="loveInput" placeholder="Express your feelings...">
-    <br>
-    <button onclick="checkLove()">Check Meter</button>
+    <h3>Say something sweet 💌</h3>
+    <input type="text" id="loveInput" placeholder="Type here...">
+    <button onclick="checkLove()">Check</button>
 
     <div class="meter-container">
         <div id="meter"></div>
     </div>
 
     <div id="emoji"></div>
+    <div id="reply"></div>
 </div>
 
 <script>
-// Reveal after 3 seconds
-setTimeout(() => {
-    document.getElementById("intro").style.display = "none";
-    document.getElementById("main").style.display = "block";
-    document.body.style.overflow = "auto";
-}, 3000);
+
+/* Create falling sparkles */
+function createSparkles() {
+    const layer = document.getElementById("sparkleLayer");
+
+    for(let i = 0; i < 40; i++){
+        let sparkle = document.createElement("div");
+        sparkle.innerHTML = "✨";
+        sparkle.className = "sparkle";
+        sparkle.style.left = Math.random() * 100 + "%";
+        sparkle.style.animationDuration = (4 + Math.random() * 4) + "s";
+        sparkle.style.fontSize = (10 + Math.random() * 8) + "px";
+        layer.appendChild(sparkle);
+    }
+}
+createSparkles();
+
+/* Intro fade */
+setTimeout(function() {
+    document.getElementById("intro").style.opacity = "0";
+    document.getElementById("sparkleLayer").style.opacity = "0.5";
+
+    setTimeout(function(){
+        document.getElementById("intro").style.display = "none";
+        document.getElementById("main").classList.add("show");
+    },1000);
+
+},2500);
 
 function checkLove() {
 
-    const sentiment = new Sentiment();
-    let text = document.getElementById("loveInput").value;
-    let result = sentiment.analyze(text);
+    var text = document.getElementById("loveInput").value.toLowerCase();
+    var meter = document.getElementById("meter");
+    var emoji = document.getElementById("emoji");
+    var reply = document.getElementById("reply");
+    var card = document.getElementById("main");
 
-    let score = result.score;  // Can be negative or positive
-    let meter = document.getElementById("meter");
-    let emoji = document.getElementById("emoji");
+    meter.style.width = "0%";
+    card.classList.remove("shake");
+    reply.innerHTML = "";
 
-    // Normalize score to percentage (limit range)
-    let percentage = Math.min(Math.max((score + 5) * 10, 0), 100);
+    setTimeout(function(){
 
-    meter.style.width = percentage + "%";
+        var score = 0;
 
-    if (score >= 3) {
-        meter.style.background = "green";
-        emoji.innerHTML = "😍💖";
-    }
-    else if (score >= 0) {
-        meter.style.background = "orange";
-        emoji.innerHTML = "🙂";
-    }
-    else {
-        meter.style.background = "red";
-        emoji.innerHTML = "😡💔";
-    }
+        var strongLove = ["love","digvy","i love you so much","i adore you","i want to marry you","i want to be with you forever","you are my world"];
+        var mediumLove = ["i love you","i miss you","i need you","you are cute","you are my baby","you are darling","you are sweetheart","cute","adorable"];
+        var playful = ["hehe","goofy","silly","smol","uwu","sweet"];
+        var negative = ["hate","fuck","worst","annoying","leave me","shut up"];
+
+        strongLove.forEach(w => { if(text.includes(w)) score += 10; });
+        mediumLove.forEach(w => { if(text.includes(w)) score += 5; });
+        playful.forEach(w => { if(text.includes(w)) score += 5; });
+        negative.forEach(w => { if(text.includes(w)) score -= 8; });
+
+        if(score > 15) score = 15;
+        if(score < -15) score = -15;
+
+        var percentage = (score + 15) * 3.3;
+        meter.style.width = percentage + "%";
+
+        if(score >= 10){
+            meter.style.background = "#ff5d8f";
+            emoji.innerHTML = "😍💖✨";
+            reply.innerHTML = "i love you vamshyyyy";
+
+            for(let i=0;i<6;i++){
+                let heart = document.createElement("div");
+                heart.innerHTML="💖";
+                heart.className="floating-heart";
+                heart.style.left = Math.random()*window.innerWidth + "px";
+                heart.style.top = "70%";
+                document.body.appendChild(heart);
+                setTimeout(()=>heart.remove(),2000);
+            }
+
+        }
+        else if(score >= 4){
+            meter.style.background = "#ff8fab";
+            emoji.innerHTML = "💗";
+        }
+        else if(score <= -6){
+            meter.style.background = "#c9184a";
+            emoji.innerHTML = "😡💔";
+            reply.innerHTML = "fuck you vamshyyyy, i hate you";
+            card.classList.add("shake");
+        }
+        else{
+            meter.style.background = "#ffd166";
+            emoji.innerHTML = "🙂";
+            reply.innerHTML = "Hmm... say it properly 😌";
+        }
+
+    },100);
 }
 </script>
 
